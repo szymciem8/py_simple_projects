@@ -7,7 +7,7 @@ class Animal:
         self.name = name
         self.age = age
 
-#Child Class that Inherited grom Animl
+#Child Class that Inherited from Animl
 class Dog(Animal):
     #class atributes
     species = "Canis Familiaris"
