@@ -20,6 +20,9 @@ class Net:
         self.n_blocks_in_x = n_blocks
         self.n_blocks_in_y = math.floor(self.height/self.block_size)
 
+        self.x_hover = 0
+        self.y_hover = 0
+
         #Creation of a net
         for i in range(self.n_blocks_in_x):
             pygame.draw.line(surface,
@@ -36,15 +39,21 @@ class Net:
         #2D list where the firs index is 'x' and second is 'y'
         #List describes which part of the board is an active or alive element
         self.active = [0]*self.n_blocks_in_x
-        for i in range(self.n_blocks_in_x):
+        for i in range(self.n_blocks_in_y):
             self.active[i] = [0] * self.n_blocks_in_y
 
         #Next 2D list which describes next board of active elements
         self.next_active = [0]*self.n_blocks_in_x
-        for i in range(self.n_blocks_in_x):
+        for i in range(self.n_blocks_in_y):
             self.next_active[i] = [0] * self.n_blocks_in_y
 
+        self.changed = [0]*self.n_blocks_in_x
+        #Add 1 for hovering cursor/shape
+        for i in range(self.n_blocks_in_x):
+            self.changed[i] = [0] * self.n_blocks_in_y
+
         self.clear_board(self.next_active)
+        self.clear_board(self.changed)
 
 
     #Create activa elements in random places
@@ -61,30 +70,36 @@ class Net:
                 block_x = x * self.block_size
                 block_y = y * self.block_size
 
-                #Alive cell - black color
-                if self.active[x][y] == 1:
-                    color = pygame.Color(0,0,0)
-                #Dead cell - white color
-                elif self.active[x][y] == 0:
-                    color = pygame.Color(255,255,255)
+                if self.changed[x][y] == 1:
+                    #Alive cell - black color
+                    if self.active[x][y] == 1:
+                        color = pygame.Color(0,0,0)
+                    #Dead cell - white color
+                    elif self.active[x][y] == 0:
+                        color = pygame.Color(255,255,255)
 
-                #Create actual cell
-                pygame.draw.rect(self.surface, 
-                                color, 
-                                (block_x+1, block_y+1, self.block_size-1, self.block_size-1))
+                    #Create actual cell
+                    pygame.draw.rect(self.surface, 
+                                    color, 
+                                    (block_x+1, block_y+1, self.block_size-1, self.block_size-1))
 
     #Description of rules of the game based od the Conway's rules
     def logic(self):
+        self.clear_board(self.changed)
         for x in range(self.n_blocks_in_x):
             for y in range(self.n_blocks_in_y):
                 if self.active[x][y] == 0 and self.neighboors(x, y) == 3:
                     self.next_active[x][y] = 1
+                    self.changed[x][y] = 1
                 elif self.active[x][y] == 1 and self.neighboors(x, y) < 2:
                     self.next_active[x][y] = 0
+                    self.changed[x][y] = 1
                 elif self.active[x][y] == 1 and self.neighboors(x, y) > 3:
                     self.next_active[x][y] = 0
+                    self.changed[x][y] = 1
                 else: 
                     self.next_active[x][y] = self.active[x][y]
+                    self.changed[x][y] = 0
 
 
         self.active = deepcopy(self.next_active)
@@ -113,11 +128,47 @@ class Net:
     def add_cell(self, x, y):
         x = math.floor(x/self.block_size)
         y = math.floor(y/self.block_size)
-        print(x, y)
         self.active[x][y] = not self.active[x][y]
+        self.changed[x][y] = 1
         self.render()
 
-    def hover(self, element):
-        #TODO
-        return 0
+    def hover(self, x, y, clear=False):
 
+        if not clear:
+            new_x = math.floor(x/self.block_size)
+            new_y = math.floor(y/self.block_size)
+
+            if self.active[new_x][new_y] == 0:
+                new_x *= self.block_size
+                new_y *= self.block_size
+                if new_x != self.x_hover: 
+                    pygame.draw.rect(self.surface, 
+                                    pygame.Color(255, 255, 255), 
+                                    (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+                    self.x_hover = new_x
+                    self.render()
+                if new_y != self.y_hover: 
+                    pygame.draw.rect(self.surface, 
+                                    pygame.Color(255, 255, 255), 
+                                    (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+                    self.y_hover = new_y
+                    self.render()
+                pygame.draw.rect(self.surface, 
+                                        pygame.Color(200, 200, 200), 
+                                        (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+            
+    def what_changed(self):
+        recs_changed = []
+
+        #Cells on the board - dead or alive
+        for x in range(self.n_blocks_in_x):
+            for y in range(self.n_blocks_in_y):
+                if self.changed[x][y] == 1:
+                    block_x = x * self.block_size + 1
+                    block_y = y * self.block_size + 1
+                    recs_changed.append([block_x, block_y, self.block_size-1, self.block_size-1])
+
+        #Cursor + shapes to be added
+        recs_changed.append([self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1])
+
+        return recs_changed
