@@ -55,6 +55,19 @@ class Net:
         self.clear_board(self.next_active)
         self.clear_board(self.changed)
 
+        self.objects = [[[1]], 
+                        
+                        [[1, 1, 1]], 
+
+                        [[1, 0, 0],
+                         [0, 1, 1], 
+                         [1, 1, 0]], 
+                         
+                         [[0, 0, 1, 1],
+                          [0, 0, 1, 1],
+                          [1, 1, 0, 0],
+                          [1, 1, 0, 0], ]]
+
 
     #Create activa elements in random places
     def set_random_dots(self, number):
@@ -70,6 +83,7 @@ class Net:
                 block_x = x * self.block_size
                 block_y = y * self.block_size
 
+                #'changed' list improves performance!
                 if self.changed[x][y] == 1:
                     #Alive cell - black color
                     if self.active[x][y] == 1:
@@ -125,38 +139,56 @@ class Net:
                         number += 1
         return number
 
-    def add_cell(self, x, y):
+    def add_cell(self, id, x, y):
         x = math.floor(x/self.block_size)
         y = math.floor(y/self.block_size)
-        self.active[x][y] = not self.active[x][y]
-        self.changed[x][y] = 1
+
+        for i in range(len(self.objects[id])):
+                for j in range(len(self.objects[id][i])):
+                    if self.objects[id][i][j] == 1:
+                        self.active[x+i][y+j] = 1
+                        self.changed[x+i][y+j] = 1
+
         self.render()
 
-    def hover(self, x, y, clear=False):
+    def hover(self, id, x, y):
 
-        if not clear:
-            new_x = math.floor(x/self.block_size)
-            new_y = math.floor(y/self.block_size)
+        new_x = math.floor(x/self.block_size)
+        new_y = math.floor(y/self.block_size)
 
-            if self.active[new_x][new_y] == 0:
-                new_x *= self.block_size
-                new_y *= self.block_size
-                if new_x != self.x_hover: 
-                    pygame.draw.rect(self.surface, 
-                                    pygame.Color(255, 255, 255), 
-                                    (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
-                    self.x_hover = new_x
-                    self.render()
-                if new_y != self.y_hover: 
-                    pygame.draw.rect(self.surface, 
-                                    pygame.Color(255, 255, 255), 
-                                    (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
-                    self.y_hover = new_y
-                    self.render()
+        if self.active[new_x][new_y] == 0:
+            new_x *= self.block_size
+            new_y *= self.block_size
+            if new_x != self.x_hover: 
                 pygame.draw.rect(self.surface, 
+                                pygame.Color(255, 255, 255), 
+                                (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+                self.x_hover = new_x
+                self.render()
+            if new_y != self.y_hover: 
+                pygame.draw.rect(self.surface, 
+                                pygame.Color(255, 255, 255), 
+                                (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+                self.y_hover = new_y
+                self.render()
+                
+            #pygame.draw.rect(self.surface, 
+            #                       pygame.Color(200, 200, 200), 
+            #                      (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+
+            #ID the choosen object      
+            #TODO improve clearing the hovering object      
+            #TODO add object rotation     
+            for i in range(len(self.objects[id])):
+                for j in range(len(self.objects[id][i])):
+                    if self.objects[id][i][j] == 1:
+                        x = new_x + 1 + i*self.block_size
+                        y = new_y + 1 + j*self.block_size
+                        pygame.draw.rect(self.surface, 
                                         pygame.Color(200, 200, 200), 
-                                        (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
-            
+                                        (x, y, self.block_size-1, self.block_size-1))
+
+        
     def what_changed(self):
         recs_changed = []
 
