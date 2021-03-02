@@ -20,7 +20,7 @@ last_x = 0
 last_y = 0
 
 object_id = 0
-max_id = 3
+max_id = 4
 min_id = 0
 
 pygame.display.update()
@@ -36,17 +36,25 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            life = not life
+            if event.key == pygame.K_s:
+                board.clear_hover(object_id)
+                life = not life
+            elif event.key == pygame.K_w:
+                board.rotate_object(object_id, "right")
+            #elif event.key == pygame.K_q:
+                #board.rotate_object(object_id, "left")
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button==1 and not life:
                 board.add_cell(object_id, x, y)
             #UP SCROLL
             if event.button == 4:
+                board.clear_hover(object_id)
                 object_id += 1
                 if object_id > max_id:
                     object_id = min_id
             #DOWN SCROLL
             if event.button == 5:
+                board.clear_hover(object_id)
                 object_id -= 1
                 if object_id < min_id:
                     object_id = max_id

@@ -57,16 +57,45 @@ class Net:
 
         self.objects = [[[1]], 
                         
-                        [[1, 1, 1]], 
+                        [[0, 0, 0], 
+                         [1, 1, 1], 
+                         [0, 0, 0]], 
 
                         [[1, 0, 0],
                          [0, 1, 1], 
                          [1, 1, 0]], 
                          
-                         [[0, 0, 1, 1],
-                          [0, 0, 1, 1],
-                          [1, 1, 0, 0],
-                          [1, 1, 0, 0], ]]
+                        [[0, 0, 1, 1],
+                         [0, 0, 1, 1],
+                         [1, 1, 0, 0],
+                         [1, 1, 0, 0], ],
+
+                        [[0, 0, 0, 1, 1, 0, 0, 0],
+                         [0, 1, 1, 0, 0, 1, 1, 0], 
+                         [0, 0, 0, 1, 1, 0, 0, 0],
+                         [1, 0, 0, 0, 0, 0, 0, 1],
+                         [0, 1, 0, 0, 0, 0, 1, 0],
+                         [0, 0, 0, 1, 1, 0, 0, 0],
+                         [1, 1, 1, 0, 0, 1, 1, 1],
+                         [1, 1, 0, 0, 0, 0, 1, 1],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 1, 1, 0, 0, 0],
+                         [0, 0, 1, 0, 0, 1, 0, 0],],
+                        
+                          
+                        [[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                         [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0], 
+                         [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1], 
+                         [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1], 
+                         [0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0], 
+                         [0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0], 
+                         [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0], 
+                         [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], 
+                         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], 
+                         [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0], \
+                         [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]]
+                        ]
 
 
     #Create activa elements in random places
@@ -160,35 +189,33 @@ class Net:
             new_x *= self.block_size
             new_y *= self.block_size
             if new_x != self.x_hover: 
-                pygame.draw.rect(self.surface, 
-                                pygame.Color(255, 255, 255), 
-                                (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+                self.render_hover(id, self.x_hover, self.y_hover, pygame.Color(255, 255, 255))
                 self.x_hover = new_x
                 self.render()
             if new_y != self.y_hover: 
-                pygame.draw.rect(self.surface, 
-                                pygame.Color(255, 255, 255), 
-                                (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
+                self.render_hover(id, self.x_hover, self.y_hover, pygame.Color(255, 255, 255))
                 self.y_hover = new_y
                 self.render()
-                
-            #pygame.draw.rect(self.surface, 
-            #                       pygame.Color(200, 200, 200), 
-            #                      (self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1))
 
-            #ID the choosen object      
-            #TODO improve clearing the hovering object      
+            #ID the choosen object         
             #TODO add object rotation     
-            for i in range(len(self.objects[id])):
-                for j in range(len(self.objects[id][i])):
-                    if self.objects[id][i][j] == 1:
-                        x = new_x + 1 + i*self.block_size
-                        y = new_y + 1 + j*self.block_size
-                        pygame.draw.rect(self.surface, 
-                                        pygame.Color(200, 200, 200), 
-                                        (x, y, self.block_size-1, self.block_size-1))
-
+            self.render_hover(id, new_x, new_y, pygame.Color(200, 200, 200))
         
+    #function that draws object either in hover mode or clear mode
+    def render_hover(self, id, new_x, new_y, color):
+
+        for i in range(len(self.objects[id])):
+            for j in range(len(self.objects[id][i])):
+                if self.objects[id][i][j] == 1:
+                    x = new_x + 1 + i*self.block_size
+                    y = new_y + 1 + j*self.block_size
+                    pygame.draw.rect(self.surface, 
+                                    color, 
+                                    (x, y, self.block_size-1, self.block_size-1))
+
+    def clear_hover(self, id):
+        self.render_hover(id, self.x_hover, self.y_hover, pygame.Color(255, 255, 255))
+
     def what_changed(self):
         recs_changed = []
 
@@ -204,3 +231,22 @@ class Net:
         recs_changed.append([self.x_hover+1, self.y_hover+1, self.block_size-1, self.block_size-1])
 
         return recs_changed
+
+
+    #Rotation of each object that is available in the list
+    def rotate_object(self, id, direction):
+
+        tab = deepcopy(self.objects[id])
+        length = len(tab)
+
+        if length > 1:
+            self.clear_hover(id)
+            if direction == "right":
+                for i in range(length):
+                    for j in range(length):
+                        self.objects[id][j][length-1-i] = tab[i][j]
+
+            elif direction == "left":
+                for i in range(length):
+                    for j in range(length):
+                        self.objects[id][i][j] = tab[j][length-1-i]
